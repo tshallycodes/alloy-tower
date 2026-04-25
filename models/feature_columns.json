@@ -1,0 +1,18 @@
+[
+  "city",
+  "zip_code",
+  "latitude",
+  "longitude",
+  "bedrooms",
+  "bathrooms",
+  "sqft",
+  "lot_size_sqft",
+  "year_built",
+  "days_since_sale",
+  "tax_year",
+  "owner_occupied",
+  "property_type_Condo",
+  "property_type_Multi Family",
+  "property_type_Single Family",
+  "property_type_Townhouse"
+]
