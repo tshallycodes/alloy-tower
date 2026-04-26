@@ -16,7 +16,7 @@ app = FastAPI(
 )
 
 _MODEL_DIR = os.getenv("MODEL_DIR", "models")
-_BEST_MODEL_PATH = os.getenv("BEST_MODEL", "models/gb_model.pkl")
+_BEST_MODEL_PATH = os.getenv("BEST_MODEL", "models/rf_model.pkl")
 _GLOBAL_MEAN = float(os.getenv("GLOBAL_PRICE_MEAN", "781993.0"))
 
 model = joblib.load(_BEST_MODEL_PATH)
@@ -32,6 +32,9 @@ with open(os.path.join(_MODEL_DIR, "city_encoding.json")) as f:
 
 with open(os.path.join(_MODEL_DIR, "state_encoding.json")) as f:
     state_encoding: dict[str, float] = json.load(f)
+
+_CITY_MEAN = sum(city_encoding.values()) / len(city_encoding)
+_STATE_MEAN = sum(state_encoding.values()) / len(state_encoding)
 
 
 class PropertyInput(BaseModel):
@@ -64,8 +67,8 @@ def process_request(data: PropertyInput) -> pd.DataFrame:
         "days_since_sale": data.days_since_sale,
         "tax_year": data.tax_year,
         "owner_occupied": int(data.owner_occupied),
-        "city": city_encoding.get(data.city, _GLOBAL_MEAN),
-        "state": state_encoding.get(data.state, _GLOBAL_MEAN),
+        "city": city_encoding.get(data.city, _CITY_MEAN),
+        "state": state_encoding.get(data.state, _STATE_MEAN),
     }
 
     for col in property_type_cols:

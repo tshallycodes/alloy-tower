@@ -4,7 +4,7 @@ import pytest
 import numpy as np
 import pandas as pd
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'ft_eng'))
 
 from feature_engineering import (
     drop_identifier_columns,
@@ -164,3 +164,13 @@ class TestDropCorrelatedFeatures:
         })
         result = drop_correlated_features(df, target='target', threshold=0.90)
         assert 'target' in result.columns
+
+    def test_protected_columns_not_dropped(self):
+        df = pd.DataFrame({
+            'a': [1.0, 2.0, 3.0, 4.0, 5.0],
+            'b': [2.0, 4.0, 6.0, 8.0, 10.0],  # perfect correlation with a
+            'target': [10, 20, 30, 40, 50],
+        })
+        result = drop_correlated_features(df, target='target', threshold=0.90, protected=['a', 'b'])
+        assert 'a' in result.columns
+        assert 'b' in result.columns

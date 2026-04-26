@@ -1,4 +1,5 @@
 import os
+import json
 import requests
 import streamlit as st
 
@@ -6,24 +7,103 @@ API_URL = os.getenv("API_URL", "http://localhost:8000")
 
 PROPERTY_TYPES = ["Single Family", "Townhouse", "Condo", "Multi Family"]
 STATES = [
-    "AZ", "CA", "CO", "FL", "GA", "HI", "ID", "IL", "IN", "KS", "KY",
-    "LA", "MA", "MD", "MI", "MN", "MO", "MT", "NC", "NE", "NM", "NV",
-    "NY", "OH", "OK", "OR", "PA", "SC", "TN", "TX", "UT", "VA", "WA",
+    "AK", "AL", "AR", "AZ", "CA", "CO", "CT", "DE", "FL", "GA",
+    "HI", "IA", "ID", "IL", "IN", "KS", "KY", "LA", "MA", "MD",
+    "ME", "MI", "MN", "MO", "MS", "MT", "NC", "ND", "NE", "NH",
+    "NJ", "NM", "NV", "NY", "OH", "OK", "OR", "PA", "RI", "SC",
+    "SD", "TN", "TX", "UT", "VA", "VT", "WA", "WI", "WV", "WY",
 ]
+
+
+def _find_file(filename: str, fallback_subdir: str) -> dict:
+    app_dir = os.path.dirname(os.path.abspath(__file__))
+    candidates = [
+        os.path.join(app_dir, filename),
+        os.path.join(app_dir, '..', fallback_subdir, filename),
+    ]
+    for path in candidates:
+        if os.path.exists(path):
+            with open(path) as f:
+                return json.load(f)
+    return {}
+
+
+@st.cache_data
+def load_zip_centroids() -> dict:
+    return _find_file('zip_centroids.json', 'data')
+
+
+@st.cache_data
+def load_city_encoding() -> dict:
+    return _find_file('city_encoding.json', 'models')
+
+
+zip_centroids = load_zip_centroids()
+city_encoding = load_city_encoding()
+CITIES = sorted(city_encoding.keys()) + ["Other"]
 
 st.set_page_config(page_title="AlloyTower Price Predictor", layout="centered")
 st.title("AlloyTower Property Price Predictor")
 st.write("Enter property details to get an estimated sale price.")
 
+# --- Coordinate session state ---
+if 'latitude' not in st.session_state:
+    st.session_state.latitude = 33.4484
+if 'longitude' not in st.session_state:
+    st.session_state.longitude = -112.074
+
+
+def on_zip_change():
+    zip_str = str(int(st.session_state.zip_widget))
+    if zip_str in zip_centroids:
+        c = zip_centroids[zip_str]
+        st.session_state.latitude = c['lat']
+        st.session_state.longitude = c['lng']
+
+
+# --- Location (outside form so on_change fires immediately) ---
+st.subheader("Location")
+loc1, loc2, loc3 = st.columns(3)
+
+with loc1:
+    zip_code = st.number_input(
+        "ZIP Code", min_value=10000, max_value=99999,
+        value=85001, step=1, key='zip_widget', on_change=on_zip_change,
+    )
+with loc2:
+    latitude = st.number_input(
+        "Latitude", min_value=-90.0, max_value=90.0,
+        step=0.0001, format="%.4f", key='latitude',
+    )
+with loc3:
+    longitude = st.number_input(
+        "Longitude", min_value=-180.0, max_value=180.0,
+        step=0.0001, format="%.4f", key='longitude',
+    )
+
+maps_url = f"https://maps.google.com/?q={int(zip_code)}"
+if str(int(zip_code)) in zip_centroids:
+    st.caption(
+        f"Coordinates auto-filled from ZIP {int(zip_code)} centroid. "
+        f"Need a different spot? [Open in Google Maps]({maps_url}), "
+        f"right-click the exact location, and copy the coordinates shown."
+    )
+else:
+    st.caption(
+        f"ZIP not in lookup. [Open ZIP {int(zip_code)} in Google Maps]({maps_url}), "
+        f"right-click the location, and copy the coordinates into the fields above."
+    )
+
+st.divider()
+
+# --- Property details form ---
 with st.form("prediction_form"):
     col1, col2 = st.columns(2)
 
     with col1:
         property_type = st.selectbox("Property Type", PROPERTY_TYPES)
-        city = st.text_input("City", value="Phoenix")
-        state = st.selectbox("State", STATES)
-        zip_code = st.number_input("ZIP Code", min_value=10000, max_value=99999,
-                                   value=85001, step=1)
+        city = st.selectbox("City", CITIES, index=CITIES.index("Phoenix") if "Phoenix" in CITIES else 0)
+        state = st.selectbox("State", STATES, index=STATES.index("AZ"))
         bedrooms = st.number_input("Bedrooms", min_value=1, max_value=20,
                                    value=3, step=1)
         bathrooms = st.number_input("Bathrooms", min_value=1.0, max_value=20.0,
@@ -41,10 +121,6 @@ with st.form("prediction_form"):
                                           max_value=10000, value=365, step=1)
         tax_year = st.number_input("Tax Year", min_value=2000, max_value=2025,
                                    value=2024, step=1)
-        latitude = st.number_input("Latitude", min_value=-90.0, max_value=90.0,
-                                   value=33.4484, step=0.0001, format="%.4f")
-        longitude = st.number_input("Longitude", min_value=-180.0, max_value=180.0,
-                                    value=-112.074, step=0.0001, format="%.4f")
 
     submitted = st.form_submit_button("Predict Price", use_container_width=True)
 

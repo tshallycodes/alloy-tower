@@ -74,12 +74,15 @@ def drop_object_columns(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def drop_correlated_features(df: pd.DataFrame, target: str = 'last_sale_price',
-                              threshold: float = 0.90) -> pd.DataFrame:
+                              threshold: float = 0.90,
+                              protected: list = None) -> pd.DataFrame:
+    protected_set = set(protected or [])
     feature_cols = [c for c in df.select_dtypes(include=[np.number, 'bool']).columns
                     if c != target]
     corr = df[feature_cols].corr().abs()
     upper = corr.where(np.triu(np.ones(corr.shape), k=1).astype(bool))
-    to_drop = [c for c in upper.columns if (upper[c] > threshold).any()]
+    to_drop = [c for c in upper.columns
+               if c not in protected_set and (upper[c] > threshold).any()]
     if to_drop:
         print(f"  Dropping correlated features (>{threshold}): {to_drop}")
         df = df.drop(columns=to_drop)
@@ -123,7 +126,7 @@ def run() -> pd.DataFrame:
         df['owner_occupied'] = df['owner_occupied'].astype(int)
 
     print("Dropping highly correlated features (threshold=0.90)...")
-    df = drop_correlated_features(df)
+    df = drop_correlated_features(df, protected=['city', 'state'])
 
     out_path = os.path.join(processed_dir, 'ft_eng.csv')
     df.to_csv(out_path, index=False)

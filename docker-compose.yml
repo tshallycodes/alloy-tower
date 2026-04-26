@@ -1,6 +1,24 @@
 version: "3.9"
 
 services:
+  mlflow:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.mlflow
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./src:/mlflow
+    working_dir: /mlflow
+    command: mlflow server --backend-store-uri sqlite:///mlflow.db --default-artifact-root /mlflow/mlruns --host 0.0.0.0 --port 5000
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
   api:
     build:
       context: .
@@ -9,8 +27,13 @@ services:
       - "8000:8000"
     env_file:
       - .env
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
     volumes:
       - ./models:/app/models
+    depends_on:
+      mlflow:
+        condition: service_healthy
     restart: unless-stopped
 
   streamlit:
