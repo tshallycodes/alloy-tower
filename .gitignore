@@ -4,5 +4,3 @@ data/
 __pycache__/
 .env
 .venv/
-.env
-src/mlflow.db
