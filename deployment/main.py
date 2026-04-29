@@ -52,6 +52,8 @@ class PropertyInput(BaseModel):
     property_type: str
     city: str
     state: str
+    assessed_value: float
+    annual_tax: float
 
 
 def process_request(data: PropertyInput) -> pd.DataFrame:
@@ -69,6 +71,8 @@ def process_request(data: PropertyInput) -> pd.DataFrame:
         "owner_occupied": int(data.owner_occupied),
         "city": city_encoding.get(data.city, _CITY_MEAN),
         "state": state_encoding.get(data.state, _STATE_MEAN),
+        "assessed_value": data.assessed_value,
+        "annual_tax": data.annual_tax,
     }
 
     for col in property_type_cols:
