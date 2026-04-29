@@ -196,6 +196,8 @@ with st.form("prediction_form"):
     submitted = st.form_submit_button("Predict Price", use_container_width=True)
 
 if submitted:
+    if assessed_value > 1000000:
+        st.warning("Predictions for properties above $1M assessed value may be less reliable.")
     with st.spinner("Predicting..."):
         try:
             df = process_request(
