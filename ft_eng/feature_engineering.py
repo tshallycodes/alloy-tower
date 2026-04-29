@@ -106,6 +106,9 @@ def run() -> pd.DataFrame:
     print("Dropping identifier / direct-leakage columns...")
     df = drop_identifier_columns(df)
 
+    print("Checking assessed_value and annual_tax for target leakage...")
+    df = handle_leakage(df)
+
     print("Grouping rare cities (<10 properties)...")
     df = group_rare_cities(df)
 
@@ -123,7 +126,7 @@ def run() -> pd.DataFrame:
         df['owner_occupied'] = df['owner_occupied'].astype(int)
 
     print("Dropping highly correlated features (threshold=0.90)...")
-    df = drop_correlated_features(df, protected=['city', 'state', 'assessed_value', 'annual_tax'])
+    df = drop_correlated_features(df, protected=['city', 'state'])
 
     out_path = os.path.join(processed_dir, 'ft_eng.csv')
     df.to_csv(out_path, index=False)

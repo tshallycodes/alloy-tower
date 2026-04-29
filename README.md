@@ -227,10 +227,14 @@ Open [http://localhost:5000](http://localhost:5000) to compare runs, metrics (RÂ
 After reviewing the comparison table printed at the end of `model.ipynb`, update the `BEST_MODEL` variable in `.env`:
 
 ```bash
+# Use XGBoost (default)
+BEST_MODEL=models/gb_model.pkl
 
 # Use Random Forest
 BEST_MODEL=models/rf_model.pkl
 
+# Use Ridge Regression
+BEST_MODEL=models/ridge_model.pkl
 ```
 
 **Local restart**: restart `uvicorn` after changing `.env`.
