@@ -181,11 +181,9 @@ with st.form("prediction_form"):
         state          = st.selectbox("State", STATES, index=STATES.index("AZ"))
         bedrooms       = st.number_input("Bedrooms", min_value=1, max_value=20, value=3, step=1)
         bathrooms      = st.number_input("Bathrooms", min_value=1.0, max_value=20.0, value=2.0, step=0.5)
+        assessed_value = st.number_input("Assessed Value ($)", min_value=0, max_value=10000000, value=300000, step=1000)
         owner_occupied = st.checkbox("Owner Occupied", value=True)
-        assessed_value = st.number_input("Assessed Value ($)", min_value=0, max_value=10000000,
-                                         value=300000, step=1000)
-        annual_tax     = st.number_input("Annual Tax ($)", min_value=0, max_value=100000,
-                                         value=4000, step=100)
+
 
     with col2:
         sqft            = st.number_input("Square Feet", min_value=100, max_value=50000, value=1500, step=50)
@@ -193,6 +191,7 @@ with st.form("prediction_form"):
         year_built      = st.number_input("Year Built", min_value=1800, max_value=2025, value=1990, step=1)
         days_since_sale = st.number_input("Days Since Last Sale", min_value=0, max_value=10000, value=365, step=1)
         tax_year        = st.number_input("Tax Year", min_value=2000, max_value=2025, value=2024, step=1)
+        annual_tax      = st.number_input("Annual Tax ($)", min_value=0, max_value=200000, value=4000, step=100)
 
     submitted = st.form_submit_button("Predict Price", use_container_width=True)
 
