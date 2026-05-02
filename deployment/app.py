@@ -4,6 +4,7 @@ import joblib
 import numpy as np
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 
 # --- Inline model loading (replaces API call for Streamlit Cloud deployment) ---
 # import requests  # (API approach — commented out)
@@ -119,6 +120,26 @@ def process_request(zip_code, latitude, longitude, bedrooms, bathrooms,
 
 st.set_page_config(page_title="AlloyTower Price Predictor", layout="centered")
 st.title("AlloyTower Property Price Predictor")
+
+# ─── Power BI Dashboard ───────────────────────────────────────────
+st.divider()
+st.subheader("📊 Data Analysis Dashboard")
+st.write("Explore the interactive Power BI dashboard for deeper insights into the property data.")
+
+POWERBI_URL = "https://app.powerbi.com/view?r=eyJrIjoiYmYwOTQwZDYtODc1ZC00NGIyLTk0NjgtYWNkYWQxNjY4MDEyIiwidCI6ImZmMGYzZTNhLTNlNTMtNDU0Zi1iMmI1LTZjNjg3NTNiOGVlNCJ9"
+
+
+components.iframe(POWERBI_URL, width=None, height=600, scrolling=True)
+
+st.caption(f"[Open dashboard in full screen ↗]({POWERBI_URL})")
+
+# Add Space
+st.markdown("<br><br>", unsafe_allow_html=True)
+st.markdown("---", unsafe_allow_html=True)
+st.markdown("<br><br>", unsafe_allow_html=True)
+
+# ─── Input Form ───────────────────────────────────────────────────────
+st.subheader("🏠 Property Details")
 st.write("Enter property details to get an estimated sale price.")
 
 # --- Coordinate session state ---
@@ -198,7 +219,7 @@ with st.form("prediction_form"):
 if submitted:
     if assessed_value > 1000000:
         st.warning("Predictions for properties above $1M assessed value may be less reliable.")
-    with st.spinner("Predicting..."):
+    with st.spinner("Predicting..."): 
         try:
             df = process_request(
                 zip_code=int(zip_code),
@@ -223,6 +244,7 @@ if submitted:
 
         except Exception as e:
             st.error(f"Prediction failed: {e}")
+
 
 # ─── ORIGINAL API-BASED CODE (commented out) ──────────────────────
 #
