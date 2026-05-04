@@ -118,10 +118,6 @@ def run() -> pd.DataFrame:
     print("Dropping remaining object columns...")
     df = drop_object_columns(df)
 
-    print("Applying log1p to assessed_value...")
-    if 'assessed_value' in df.columns:
-        df['assessed_value'] = np.log1p(df['assessed_value'])
-
     # Cast bool owner_occupied to int for model compatibility
     if 'owner_occupied' in df.columns:
         df['owner_occupied'] = df['owner_occupied'].astype(int)
