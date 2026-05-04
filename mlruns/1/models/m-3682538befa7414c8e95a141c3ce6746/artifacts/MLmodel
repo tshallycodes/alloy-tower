@@ -1,0 +1,23 @@
+artifact_path: file:c:/Users/bubut/Documents/personalprojects/amdari/AlloyTower/src/mlruns/1/models/m-3682538befa7414c8e95a141c3ce6746/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.14.2
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.8.0
+    skops_trusted_types: null
+mlflow_version: 3.11.1
+model_id: m-3682538befa7414c8e95a141c3ce6746
+model_size_bytes: 244832
+model_uuid: m-3682538befa7414c8e95a141c3ce6746
+prompts: null
+run_id: c8f0fdd66ef440349b09a13bce2af446
+utc_time_created: '2026-05-04 21:09:19.045617'

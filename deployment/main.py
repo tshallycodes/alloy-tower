@@ -71,7 +71,7 @@ def process_request(data: PropertyInput) -> pd.DataFrame:
         "owner_occupied": int(data.owner_occupied),
         "city": city_encoding.get(data.city, _CITY_MEAN),
         "state": state_encoding.get(data.state, _STATE_MEAN),
-        "assessed_value": data.assessed_value,
+        "assessed_value": np.log1p(data.assessed_value),
         "annual_tax": data.annual_tax,
     }
 
