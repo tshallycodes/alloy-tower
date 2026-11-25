@@ -22,6 +22,8 @@ VALID_PAYLOAD = {
     "property_type": "Single Family",
     "city": "Phoenix",
     "state": "AZ",
+    "assessed_value": 300000.0,
+    "annual_tax": 4000.0,
 }
 
 
@@ -86,3 +88,14 @@ class TestPredictEndpoint:
         payload = {**VALID_PAYLOAD, "state": "ZZ"}
         response = client.post("/predict", json=payload)
         assert response.status_code == 200
+
+    def test_price_tracks_assessed_value(self, client):
+        # Guards against train/serve skew: the model expects log(assessed_value).
+        # Sending raw dollars put every house in the top branch (about $2.9M).
+        def price(assessed):
+            payload = {**VALID_PAYLOAD, "assessed_value": assessed}
+            return client.post("/predict", json=payload).json()["predicted_price"]
+
+        low, high = price(300000.0), price(600000.0)
+        assert 150_000 < low < 600_000
+        assert high > low * 1.3
